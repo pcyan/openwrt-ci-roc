@@ -20,5 +20,12 @@ jobs:
       needs: Arthur-Athena-ImmortalWrt
       uses: ./.github/workflows/Taiyi-ImmortalWrt.yml
 
+    RAX3000M-ImmortalWrt:
+      uses: ./.github/workflows/RAX3000M-ImmortalWrt.yml
+
+    x86-64-ImmortalWrt:
+      needs: RAX3000M-ImmortalWrt
+      uses: ./.github/workflows/x86-64-ImmortalWrt.yml
+
     All-Clean:
       uses: ./.github/workflows/All-Clean.yml
