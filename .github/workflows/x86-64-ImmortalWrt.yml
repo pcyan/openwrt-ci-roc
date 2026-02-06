@@ -20,9 +20,14 @@ env:
 
 jobs:
   Build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
 
     steps:
+    - name: Maximize Disk Space(最大化磁盘空间)
+      uses: sbwml/actions@free-disk
+      with:
+        build-mount-path: /roc
+
     - name: Check Server Performance(检查服务器性能)
       run: |
         echo "警告⚠"
@@ -42,7 +47,7 @@ jobs:
         DEBIAN_FRONTEND: noninteractive
       run: |
         sudo -E apt-get -y update
-        sudo -E apt-get -y install $(curl -fsSL is.gd/depends_ubuntu_2204)
+        sudo -E apt-get -y install $(curl -fsSL ophub.org/ubuntu2404-make-openwrt-depends)
         sudo -E systemctl daemon-reload
         sudo timedatectl set-timezone "$TZ"
 
@@ -52,10 +57,9 @@ jobs:
     - name: Clone Source Code(克隆源代码)
       run: |
         df -hT $GITHUB_WORKSPACE
-        sudo mkdir -p /mnt/openwrt
-        sudo chown -R $(id -u):$(id -g) /mnt/openwrt
-        git clone --depth 1 -b $REPO_BRANCH --single-branch $REPO_URL /mnt/openwrt
-        cd /mnt/openwrt
+        sudo chown -R $(id -u):$(id -g) /roc
+        git clone --depth 1 -b $REPO_BRANCH --single-branch $REPO_URL /roc
+        cd /roc
         echo "OPENWRT_PATH=$PWD" >> $GITHUB_ENV
         VERSION_INFO=$(git show -s --date=short --format="作者: %an<br/>时间: %cd<br/>内容: %s<br/>hash: %H")
         echo "VERSION_INFO=$VERSION_INFO" >> $GITHUB_ENV
@@ -142,6 +146,7 @@ jobs:
         cd $OPENWRT_PATH/bin/targets/*/*
         cp $OPENWRT_PATH/.config x86.64.config
         mv config.buildinfo x86.64.config.buildinfo
+        mv immortalwrt-x86-64-generic.manifest x86.64.manifest
         mv -f $OPENWRT_PATH/bin/packages/*/*/*.apk packages
         tar -zcf x86.64.Packages.tar.gz packages
         rm -rf packages feeds.buildinfo version.buildinfo sha256sums profiles.json
@@ -166,7 +171,7 @@ jobs:
         body: |
           **This is OpenWrt Firmware for ${{ env.FIRMWARE_TAG }}**
           ### 📒 固件信息
-          - 这是基于ImmortalWrt主线制作的个人定制固件，默认主题为Argon；该固件在ImmortalWrt的基础上，添加了额外的软件包cpufreq、ddns、ttyd、upnp、wolplus、samba4、vlmcsd、aria2、autoreboot、uhttpd、frps、frpc、diskman、hd-idle、banip、acme、arpbind、usb-printer、homeproxy、openlist、adguardhome、filebrowser、dockerman、gecoosac、lucky、oaf、sqm、wireguard、watchcat、wechatpush、3cat，并添加了若干工具，具体详见x86-64.config。
+          - 这是基于ImmortalWrt主线制作的个人定制固件，默认主题为Aurora；该固件在ImmortalWrt的基础上，添加了额外的软件包cpufreq、ddns、ttyd、upnp、wolplus、samba4、vlmcsd、aria2、autoreboot、uhttpd、frps、frpc、diskman、hd-idle、banip、acme、arpbind、usb-printer、openlist、dockerman、gecoosac、lucky、oaf、sqm、wireguard、watchcat、wechatpush、3cat、passwall、passwall2、openclash、smartdns，并添加了若干工具，具体详见x86-64.config和General.config。
           - 💻 这是 ${{ env.FIRMWARE_TAG }} 平台使用的 OpenWrt 固件
           - ⚽ 固件源码: ${{ env.REPO_URL }}
           - 💝 源码分支: ${{ env.REPO_BRANCH }}
